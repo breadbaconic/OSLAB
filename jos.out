@@ -1,0 +1,58 @@
+make[1]: Entering directory `/home/oslab/os2012/lab1'
+sed "s/localhost:1234/localhost:25000/" < .gdbinit.tmpl > .gdbinit
+***
+*** Use Ctrl-a x to exit qemu
+***
+qemu -nographic -hda obj/kern/kernel.img -serial mon:stdio -gdb tcp::25000 -D qemu.log 
+[1;256r[256;256H[6n
+Google, Inc.
+Serial Graphics Adapter 09/19/12
+SGABIOS $Id: sgabios.S 8 2010-04-22 00:03:40Z nlaredo $ (root@debian) Wed Sep 19 18:16:08 UTC 2012
+4 0
+[2J[m[mSeaBIOS (version pre-0.6.3-20110315_112143-titi)
+
+
+iPXE v1.0.0-591-g7aee315
+iPXE (http://ipxe.org) 00:03.0 CA00 PCI2.10 PnP PMM+07FC8D60+07F88D60 CA00
+Press Ctrl-B to configure iPXE (PCI 00:03.0)...                                                                               
+
+Booting from Hard Disk...
+6828 decimal is 15254 octal!
+chnum1: 28 chnum2: 29
+
+error! writing through NULL pointer! (%n argument)
+
+warning! The value %n argument pointed to has been overflowed!
+chnum1: -1
+entering test_backtrace 5
+entering test_backtrace 4
+entering test_backtrace 3
+entering test_backtrace 2
+entering test_backtrace 1
+entering test_backtrace 0
+ebp f010fe08 eip f0100130 args 00000000 00000000 00000000 0000001a f0100b79 
+kern/init.c:19: test_backtrace+76
+ebp f010fe28 eip f0100112 args 00000000 00000001 f010fe68 0000001a f0100b79 
+kern/init.c:16: test_backtrace+46
+ebp f010fe48 eip f0100112 args 00000001 00000002 f010fe88 0000001a f0100b79 
+kern/init.c:16: test_backtrace+46
+ebp f010fe68 eip f0100112 args 00000002 00000003 f010fea8 0000001a f0100b79 
+kern/init.c:16: test_backtrace+46
+ebp f010fe88 eip f0100112 args 00000003 00000004 00000000 0000000b 00000000 
+kern/init.c:16: test_backtrace+46
+ebp f010fea8 eip f0100112 args 00000004 00000005 00000000 f010feee 00010094 
+kern/init.c:16: test_backtrace+46
+ebp f010fec8 eip f010024e args 00000005 ffffffff f010ffef f010ffee 00000000 
+kern/init.c:51: i386_init+265
+ebp f010fff8 eip f010003e args 00111021 00000000 00000000 00000000 00000000 
+kern/entry.S:83: <unknown>+0
+
+
+leaving test_backtrace 0
+leaving test_backtrace 3
+leaving test_backtrace 2
+leaving test_backtrace 3
+leaving test_backtrace 5
+Welcome to the JOS kernel monitor!
+Type 'help' for a list of commands.
+K> make[1]: Leaving directory `/home/oslab/os2012/lab1'
