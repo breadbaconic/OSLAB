@@ -74,7 +74,7 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
     	}        
         cprintf("\n");
         
-	debuginfo_eip((int)eip,&info);
+	    debuginfo_eip((int)eip,&info);
     
         cprintf("%s:%d: %.*s+%d\n",info.eip_file,info.eip_line,info.eip_fn_namelen,info.eip_fn_name,(int )eip-(int )info.eip_fn_addr);
         ebps[j++]=ebp;
@@ -85,33 +85,7 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 	corruptStack(0x3,(char *)((int *)ebps[2]+2));
 	corruptStack(0x5,(char *)((int *)ebps[5]+2));
 	*(int *)ebps[4]=*(int *)ebps[5];	
-/*
-    int base=ebps[0]&0x000000ff;
-    int gap=ebps[1]-ebps[0];
-
-    corruptStack(gap*1,(char *)ebps[0]);
-     cprintf("\n%x\t%x\t%x\n",base,gap*1,*(int *)ebps[0]);
-    *(int *)ebps[0]=(base+(*(int *)ebps[0]));//28
-	
-    base=ebps[1]&0x000000ff;
-    corruptStack(gap*3,(char *)ebps[1]);
-    cprintf("\n%x\t%x\t%x\n",base,gap*3,*(int *)ebps[1]);
-    *(int *)ebps[1]=(base+(*(int *)ebps[1]));//88
-
-   int a4=ebps[3];
-    corruptStack(gap*2,(char *)ebps[4]);
-    cprintf("\n%x\t%x\t%x\n",base,gap*2,*(int *)ebps[4]);
-    *(int *)ebps[4]=(base+(*(int *)ebps[4]));//68
-
-    base=ebps[4]&0x000000ff;//88
- 	corruptStack(gap*2,(char *)ebps[3]);
-   cprintf("\n%x\t%x\t%x\n",base,gap*2,*(int *)ebps[3]);
-*((int *)ebps[4]+1)=    0xf0100112;
-*((int *)ebps[4]+2)=    0x2;
-*(int *)ebps[4]=(base+(*(int *)ebps[3]));//C8
-	
-	*(int *)a4=
-    */
+    
     return 0;
 	
 }
@@ -124,9 +98,7 @@ void corruptStack(unsigned int value, char * point)
 	//Your code here
     char ntest[value+1];
     memset(ntest,0xd,sizeof(ntest));
-   // char target[value]; 
     ntest[value]='\0';
-    //strncpy(target,ntest,value);
     cprintf("%s%n\n",ntest,point);
      	
 }
@@ -183,8 +155,14 @@ monitor(struct Trapframe *tf)
 
 	cprintf("Welcome to the JOS kernel monitor!\n");
 	cprintf("Type 'help' for a list of commands.\n");
-
-
+    //int x = 1,y = 3,z = 4;
+    //cprintf("x %d, y %x, z %d\n",x,y,z);
+    //unsigned int i = 0x00646c72;
+    //cprintf("H%x Wo%s\n",57616,&i);
+    //cprintf("x %d y %d\n",3);
+   // int one_char=0;
+   // cprintf("%c%n\n",'f',&one_char);
+  //cprintf("%d\n",one_char);
 	while (1) {
 		buf = readline("K> ");
 		if (buf != NULL)

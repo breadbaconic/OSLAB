@@ -162,6 +162,7 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 		// character
 		case 'c':
 			putch(va_arg(ap, int), putdat);
+            iter++;
 			break;
 
 		// error message
@@ -169,10 +170,12 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 			err = va_arg(ap, int);
 			if (err < 0)
 				err = -err;
-			if (err >= MAXERROR || (p = error_string[err]) == NULL)
+			if (err >= MAXERROR || (p = error_string[err]) == NULL){
 				printfmt(putch, putdat, "error %d", err);
-			else
+                iter+=6; 
+            }else{
 				printfmt(putch, putdat, "%s", p);
+            }
 			break;
 
 		// string
@@ -215,14 +218,14 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 			base = 10;
 			goto number;
 
-		// (unsigned) octal
+		// (unsigned) octal#
 		case 'o':
 			// Replace this with your code.
 		//	putch('X', putdat);
 		//	putch('X', putdat);
 		//	putch('X', putdat);
 		//	break;
-            num=getuint(&ap,lflag);
+            num = getuint(&ap,lflag);
             base = 8;
             goto number;
 		// pointer
@@ -266,19 +269,19 @@ vprintfmt(void (*putch)(int, void*), void *putdat, const char *fmt, va_list ap)
 
 		    const char *null_error = "\nerror! writing through NULL pointer! (%n argument)\n";
 		    const char *overflow_error = "\nwarning! The value %n argument pointed to has been overflowed!\n";
-            signed char *arg=NULL;
+            signed char *arg = NULL;
 		    // Your code here
 			if((arg = va_arg(ap,signed char *)) == NULL){
 				printfmt(putch, putdat, "%s", null_error);
                 break;
             }
-            if(iter>127||iter<0){
+            if(iter > 127 || iter < 0){
              //   printfmt(putch,putdat,"%d",iter);
 				printfmt(putch, putdat, "%s",overflow_error);
-                *arg=-1;
+                *arg = -1;
                 break;
             }
-            *arg=iter;
+            *arg = iter;
 		    break;
 		}
 		// unrecognized escape sequence - just print it literally
