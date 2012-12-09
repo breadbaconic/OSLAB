@@ -1,0 +1,22 @@
+1. The interrupt handler function needs to put the trap number into the kernel stack in the form of Trapframe, 
+    it would be difficult to set the trap number if all interrupts were delivered to the same handler.
+2. The privilege level of page fault numbered 14 is 0, hence it could only be invoked by kernel. 
+    If we try to invoke a page fault in user level, it actually invoke the general protection fault numbered 13.
+    However, if we modify the privilege level to 3 in kern/trap.c to allow softint's int $14, we could generate 
+    page fault in softint.c. Yet it was NOT a right way to invoke an interruption. With reference to Chapter 5 
+    of IA-32 Developer's Manual, we get that the page fault interruption requires an error code, however, 
+    we actually did not push the error code in software-way even if it is now allowed by kernel. Nevertheless,
+    the exception handler will still attempt to pop an error code from the stack while handling the exception. 
+    Because no error code is pushed,  the handler will pop off and discard the EIP instead (in place of the missing error code). 
+    This sends the return to the wrong location.
+3. When we initialize the idt in kern/trap.c, we should set the Descriptor Privilege Level(DPL) to 3 in order to 
+    allow user invoke. When we generate an interrupt using "int n", the program will check the CPL and DPL.
+    We could only invoke an interrupt when the CPL is less than or equal to the current DPL. We invoke the interrupt
+    in user mode (CPL=3), hence we should set DPL as 3, otherwise it will produce a General Protection Interruption.
+4. The softint would generate an exception in user mode. When the exception is catched by processor, it will transfer the 
+    to the entry-points defined at Interrupt Descriptor Table, which checks the DPL and find that the DPL=0 whereas the CPL=3,
+    hence it would change the exception number from $14 to $13 to invoke a General Protection Fault.
+    The TRAPHANDLER pushes the trap number onto stack and jump to _alltraps in trapentry.S, which pushes the context registers onto stack 
+    in the reverse order of struct Trapframe* and jump to trap() in kern/trap.c, then the running environment will start at the trap point.
+    trap_dispatch will print the status of the TrapFrame.
+    
