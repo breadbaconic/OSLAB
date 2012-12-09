@@ -91,8 +91,6 @@ mon_backtrace(int argc, char **argv, struct Trapframe *tf)
 }
 void corruptStack(unsigned int value, char * point)
 {
-
-
    	 // And you must use the "cprintf" function with %n specifier
    	 // you augmented in the "Exercise 9" to do this job.
 	//Your code here
@@ -100,7 +98,6 @@ void corruptStack(unsigned int value, char * point)
     memset(ntest,0xd,sizeof(ntest));
     ntest[value]='\0';
     cprintf("%s%n\n",ntest,point);
-     	
 }
 
 
