@@ -1,0 +1,1 @@
+Question 1: uintptr_t. These codes run in JOS kernel, hence the pointer should be kernel virtual address. 
