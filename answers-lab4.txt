@@ -1,0 +1,58 @@
+Question 1.
+The macro MPBOOTPHYS was used to calculate the absolute addresses of symbols rather than relying the linker to fill them.
+In boot.S, the page table was not initialized so we can set the start address of program by loading the physical address
+like "lgdt gdtdesc". However, the AP was already in protected mode in mpentry.S, so we need to calculate the linear address.
+Question 2:
+Consider CPU 0 and 1.
+The CPU0 was running and busy waiting for an interrupt. CPU1 started running hence the kernel switched to CPU1 and then
+it was also busy waiting for some interrupt. The interrupt that CPU0 was waiting happened and the kernel switched to CPU0
+but the content CPU1 stored in shared kernel stack was not popped hence it will cause faults.
+Question 3:
+The the context switch was conducted in kernel the address of which was the same in the page directory of all processes. 
+
+Challenge that I implemented:
+1.sfork:
+sfork() is implemented as a shared-memory fork. The parent and the child process will share all pages except the ones in 
+stack area. Hence we should modify the fork() and duppage() as follows;
+1).All the pages in the user stack was continuous from the USTACKTOP. Hence we should judge whether a certain page in stack area
+by checking the consecutiveness. If a page was not present from the USTACKTOP, then the following pages below it was not pages in 
+stack area.
+2).Then we need to modify the duppage(). It should only set the in-stack page as PTE_COW.
+if(INSTACK and (PTE_COW is set)){
+        sys_page_map(0,addr,envid,addr,PTE_U|PTE_P|PTE_COW)                  
+	    sys_page_map(envid,addr,0,addr,PTE_U|PTE_P|PTE_COW)
+}else if(PTE_W is set){
+        sys_page_map(0,addr,envid,addr,PTE_P|PTE_U|PTE_W)
+}else{
+        sys_page_map(0,addr,envid,addr,PTE_P|PTE_U)
+}
+3).After that, the global variable thisenv may be invalid after the process changes for it was defined in lib/libmain.h and will
+be shared by all processes. When we need to use thisenv in ipc_recv, we should replace it with envs+ENVX[sys_getenvid()] to get the 
+current env through a new syscall.
+
+2.Test the overhead of the fork.
+To test the overhead of the fork syscall, I use RDTSC instruction to calculate the CPU cycles of the function. 
+With referecnce to the IA32 manual, I find that the operation of RDTSC:
+EDX:EAX<-TimeStampCounter (Vol.2B 4-251)
+Therefore, we should read the high 32 bit of the TimeStamp from %edx and the low 32 bit from the %eax.
+I add the following code in the function fork():
+
+asm("rdtsc \n\t");
+asm("movl %%eax, %0\n\t":"=g"(start_low));
+asm("movl %%edx, %0\n\t":"=g"(start_high));
+start = start_high;
+start = (start<<32)|start_low;
+
+...
+
+asm("rdtsc \n\t");
+asm("movl %%eax, %0\n\t":"=g"(end_low));
+asm("movl %%edx, %0\n\t":"=g"(end_high));
+end = end_high;
+end = (end<<32)|end_low;
+cprintf("[alex]fork clock cycle is:\t%010u\n",(unsigned)(end-start));
+But this may cause some error when grading(for it occupies some registers), hence I comment them in the final edition.
+The overhead of a user designed fork was non-trivial, and it varies from 2e6 to 3e6 CPU cycles with about 30 syscalls in the QEMU JOS. 
+The result will be more  precise in real hardware.
+
+
